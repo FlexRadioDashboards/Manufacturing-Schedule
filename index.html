@@ -110,6 +110,9 @@
   .cell.today{background:var(--accent-bg)}
   .cell-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px}
   .cell-date{font-family:"Syne",sans-serif;font-weight:700;font-size:15px;color:var(--ink)}
+  .cell-mlabel{display:none;font-family:"Syne",sans-serif;font-weight:700;font-size:14px;color:var(--ink)}
+  .cell.today .cell-mlabel{color:var(--accent)}
+  .cell.weekend .cell-mlabel{color:var(--ink-mute)}
   .cell.weekend .cell-date{color:var(--ink-mute)}
   .cell-mon{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
   .cell.today .cell-date{color:var(--accent)}
@@ -444,6 +447,31 @@
     .pl-layout{grid-template-columns:1fr;height:auto}
     #pool{overflow-y:visible;max-height:340px}
     .fd-layout{grid-template-columns:1fr}
+  }
+  /* Phone: turn the 4-week grid into a stacked day-by-day agenda (no sideways scroll) */
+  @media (max-width:640px){
+    body{padding:16px 12px 36px}
+    .masthead{flex-direction:column;align-items:flex-start;gap:8px}
+    .masthead-title{font-size:26px}
+    .controls{flex-direction:column;align-items:stretch;gap:10px}
+    .weeknav{justify-content:space-between}
+    .chips{gap:8px}
+    .cal{overflow:visible}
+    .dow-header{display:none}
+    .week-row{grid-template-columns:1fr;border-bottom:2px solid var(--bdr)}
+    .week-row:last-child{border-bottom:none}
+    .cell{border-right:none;border-bottom:1px solid var(--bdr-soft);min-height:auto;padding:10px 12px}
+    .cell:last-child{border-bottom:none}
+    .cell .cell-date,.cell .cell-mon{display:none}
+    .cell .cell-mlabel{display:block}
+    .cell-head{margin-bottom:6px}
+    /* show only days that actually have something — a clean agenda */
+    .cell:not(:has(.evt)):not(:has(.bevt)):not(:has(.ooo-chip)){display:none}
+    .week-row:not(:has(.evt)):not(:has(.bevt)):not(:has(.ooo-chip)){display:none}
+    /* roomier tap targets */
+    .evt,.bevt,.ooo-chip{padding:9px 11px;font-size:13px;line-height:1.3}
+    .evt .evt-title,.bevt .evt-title,.ooo-chip .evt-title{white-space:normal}
+    .more{padding:8px 10px;font-size:12px}
   }
 </style>
 </head>
@@ -802,8 +830,10 @@ function render(){
       cell.className='cell'+(isWeekend?' weekend':'')+(isToday?' today':'');
 
       const showMon=(day.getDate()===1)||(w===0&&i===0);
+      const mlabel=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]+', '+MONTHS[day.getMonth()]+' '+day.getDate();
       const head=document.createElement('div'); head.className='cell-head';
       head.innerHTML=`<span class="cell-date">${showMon?MONTHS[day.getMonth()]+' '+day.getDate():day.getDate()}</span>`
+        +`<span class="cell-mlabel">${mlabel}</span>`
         +(isToday?'<span class="cell-today-tag">Today</span>':(showMon&&!isToday?'<span class="cell-mon"></span>':''));
       cell.appendChild(head);
 
